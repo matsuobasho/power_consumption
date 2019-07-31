@@ -1,6 +1,6 @@
 # Electricity consumption forecasting with LSTMs
 
-### This is an adaptation of a tutorial on LSTM's on machinelearningmastery.com (https://machinelearningmastery.com/how-to-develop-lstm-models-for-multi-step-time-series-forecasting-of-household-power-consumption/#comment-494688)
+### This is an adaptation of a tutorial on LSTM's on [machinelearningmastery.com](https://machinelearningmastery.com/how-to-develop-lstm-models-for-multi-step-time-series-forecasting-of-household-power-consumption/#comment-494688)
 The repo is a way for me to confirm understanding applications of LSTM's and to get hands-on practice setting one up
 
 ### Setup
