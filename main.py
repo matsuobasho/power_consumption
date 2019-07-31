@@ -9,6 +9,8 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Flatten
 from keras.layers import LSTM
+from keras.layers import TimeDistributed
+from keras.layers import RepeatVector
 
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
@@ -63,7 +65,7 @@ def to_supervised(train, n_input, n_out=7):
         # ensure we have enough data for this instance
         if out_end <= len(data):
             x_input = data[in_start:in_end, :]
-            x_input = x_input.reshape((len(x_input), 8))
+            #x_input = x_input.reshape((len(x_input), 1))
             X.append(x_input)
             y.append(data[in_end:out_end, 0])
         # move along one time step
@@ -76,15 +78,19 @@ def build_model(train, n_input):
     # prepare data
     train_x, train_y = to_supervised(train, n_input)
     # define parameters
-    verbose, epochs, batch_size = 1, 70, 16
+    verbose, epochs, batch_size = 1, 50, 16
     n_timesteps, n_features, n_outputs = train_x.shape[1], train_x.shape[2], train_y.shape[1]
+
+    # reshape output into [samples, timesteps, features]
+    train_y = train_y.reshape((train_y.shape[0], train_y.shape[1], 1))
+
     # define model
     model = Sequential()
-    model.add(LSTM(200, activation='relu', input_shape=(n_timesteps, n_features), return_sequences=True))
-    model.add(LSTM(100, activation='relu', return_sequences=True))
-    model.add(LSTM(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(n_outputs))
+    model.add(LSTM(200, activation='relu', input_shape=(n_timesteps, n_features)))
+    model.add(RepeatVector(n_outputs))
+    model.add(LSTM(200, activation='relu', return_sequences=True))
+    model.add(TimeDistributed(Dense(100, activation='relu')))
+    model.add(TimeDistributed(Dense(1)))
     model.compile(loss='mse', optimizer='adam')
     # fit network
     model.fit(train_x, train_y, epochs=epochs, batch_size=batch_size, verbose=verbose)
@@ -100,7 +106,7 @@ def forecast(model, history, n_input):
     input_x = data[-n_input:, :]
     # reshape into [1, n_input, # of features]
     # hardcoded to 8 here
-    input_x = input_x.reshape((1, len(input_x), 8))
+    input_x = input_x.reshape((1, len(input_x), input_x.shape[1]))
     # forecast the next week
     yhat = model.predict(input_x, verbose=0)
     # we only want the vector forecast
@@ -137,7 +143,7 @@ def main():
     # output of train is array shape (159, 7, 8)
     train, test = split_dataset(dataset.values)
     # evaluate model and get scores
-    n_input = 7
+    n_input = 14
 
     # evaluate model calls build model function first thing
     # first step in build model is converting train to a supervised form
