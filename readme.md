@@ -13,7 +13,7 @@ Munge.py fills in missing values, adds engineered feature and parses dates.
 Downsample.py resamples minute-level data to daily data.
 
 Model:
-train.py 
+main.py 
 
 ### Notes
 Updated run is multivariate input (all variables in dataset) from previous 2 weeks to predict next week's power consumption
